@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FDFCFB;
+  --color-foreground: #1A1A1A;
+  --color-surface: #FFFFFF;
+  --color-surface-light: #FAF9F6; /* Warm Off-White */
+  --color-accent-rose: #E11D48;
+  --color-accent-gold: #D4AF37;
+  --color-accent-blue: #BAE6FD;
+  --color-accent-indigo: #6366F1;
+  --color-footer-bg: #FFF1F2; /* Soft Dusty Rose */
+  
+  --radius-xl: 12px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-4xl: 48px;
+  
+  --font-sans: var(--font-outfit), var(--font-inter), ui-sans-serif, system-ui;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui;
+  --font-serif: "Fraunces", serif;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-glow: glow 3s ease-in-out infinite alternate;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 10px rgba(225, 29, 72, 0.1), 0 0 20px rgba(225, 29, 72, 0.05); }
+    to { box-shadow: 0 0 40px rgba(225, 29, 72, 0.2), 0 0 60px rgba(225, 29, 72, 0.1); }
+  }
+}
+
+@layer base {
+  :root {
+    --background: #FDFCFB;
+    --foreground: #1A1A1A;
+  }
+
+  body {
+    @apply bg-background text-foreground selection:bg-accent-rose/10 selection:text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-serif);
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/60 backdrop-blur-xl border border-black/[0.04];
+  }
+  
+  .glass-premium {
+    @apply bg-white/95 backdrop-blur-3xl border border-black/[0.06] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)];
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-gray-950 via-gray-800 to-gray-600;
+  }
+
+  .accent-gradient {
+    @apply bg-gradient-to-r from-accent-rose via-orange-400 to-accent-gold;
+  }
+
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+  }
+
+  .fabric-pattern {
+    background-image: radial-gradient(#000 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+    opacity: 0.03;
+  }
+
+  .stitch-border {
+    background-image: repeating-linear-gradient(90deg, #E11D48 0, #E11D48 8px, transparent 8px, transparent 16px);
+    background-size: 100% 1.5px;
+    background-repeat: no-repeat;
+    background-position: bottom;
+  }
+
+  .section-padding {
+    @apply py-32 md:py-48;
+  }
+}
+
+
+
+
+

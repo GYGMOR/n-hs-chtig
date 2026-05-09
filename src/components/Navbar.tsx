@@ -35,9 +35,9 @@ export default function Navbar() {
         isScrolled ? "py-4" : "py-8"
       }`}
     >
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className={`relative flex items-center justify-between rounded-[32px] transition-all duration-700 px-10 ${
-          isScrolled ? "glass-premium py-4" : "py-4"
+      <div className="container mx-auto px-3 sm:px-6 max-w-7xl">
+        <div className={`relative flex items-center justify-between rounded-[24px] sm:rounded-[32px] transition-all duration-700 px-4 sm:px-8 md:px-10 ${
+          isScrolled ? "glass-premium py-3 sm:py-4" : "py-3 sm:py-4"
         }`}>
           {/* Stitch Border on Scroll */}
           {isScrolled && (

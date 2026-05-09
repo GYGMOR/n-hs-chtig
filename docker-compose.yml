@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  naehsuechtig:
+    image: ghcr.io/gygmor/made-by-naehsuechtig:latest
+    container_name: naehsuechtig_app
+    restart: unless-stopped
+    networks:
+      - web
+    environment:
+      NODE_ENV: "production"
+      PORT: "3000"
+      DATABASE_URL: "postgres://sysadmin:rzP3MHh%3FZDckRe@db:5432/made-by-n%C3%A4hs%C3%BCchtig"
+      NEXT_PUBLIC_APP_URL: "https://DEINE_DOMAIN.CH"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+    labels:
+      caddy: "DEINE_DOMAIN.CH, www.DEINE_DOMAIN.CH"
+      com.centurylinklabs.watchtower.enable: "true"
+
+networks:
+  web:
+    external: true

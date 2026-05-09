@@ -22,10 +22,7 @@ interface CartStore {
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
-      items: [
-        { id: 1, name: "Artisan Leder-Shopper", price: 249, quantity: 1, image: "https://images.unsplash.com/photo-1544816153-0973059430c5?q=80&w=800&auto=format&fit=crop" },
-        { id: 2, name: "Keramik-Vase 'Minimalist'", price: 89, quantity: 1, image: "https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=800&auto=format&fit=crop" },
-      ],
+      items: [],
       addItem: (newItem) => set((state) => {
         const existingItem = state.items.find(item => item.id === newItem.id);
         if (existingItem) {

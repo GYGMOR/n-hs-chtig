@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit, Fraunces } from "next/font/google";
 import "./globals.css";
-import BackgroundSystem from "@/components/BackgroundSystem";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import ShopShell from "@/components/ShopShell";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,8 +15,8 @@ const outfit = Outfit({
   display: "swap",
 });
 
-const fraunces = Fraunces({ 
-  subsets: ["latin"], 
+const fraunces = Fraunces({
+  subsets: ["latin"],
   variable: "--font-serif",
   axes: ["SOFT", "WONK"],
   display: "swap",
@@ -40,14 +38,7 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} ${fraunces.variable} h-full antialiased selection:bg-accent-rose/10`}
     >
       <body className="min-h-full bg-background font-sans text-foreground overflow-x-hidden">
-        <BackgroundSystem />
-        <Navbar />
-        <main className="relative z-10 flex min-h-screen flex-col">
-          <div className="flex-grow">
-            {children}
-          </div>
-          <Footer />
-        </main>
+        <ShopShell>{children}</ShopShell>
       </body>
     </html>
   );

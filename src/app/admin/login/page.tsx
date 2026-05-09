@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
-            type="email"
+            type="text"
             placeholder="E-Mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

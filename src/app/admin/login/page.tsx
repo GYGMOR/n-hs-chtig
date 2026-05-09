@@ -5,25 +5,26 @@ import { useRouter } from "next/navigation";
 import { Lock, Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     });
     if (res.ok) {
       router.push("/admin");
     } else {
       const data = await res.json();
-      setError(data.error ?? "Falsches Passwort");
+      setError(data.error ?? "Ungültige Anmeldedaten");
     }
     setLoading(false);
   }
@@ -39,14 +40,22 @@ export default function AdminLoginPage() {
           <p className="text-sm text-gray-400">Made by Nähsüchtig</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="email"
+            placeholder="E-Mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoFocus
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 transition-colors text-gray-900"
+          />
           <input
             type="password"
             placeholder="Passwort"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            autoFocus
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 transition-colors text-gray-900"
           />
           {error && <p className="text-red-500 text-sm">{error}</p>}

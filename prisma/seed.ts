@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import bcrypt from 'bcryptjs'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
@@ -75,7 +76,16 @@ async function main() {
     })
   }
 
-  console.log('Seed erfolgreich: Kategorien und Produkte eingefügt.')
+  // Admin user
+  const adminEmail = 'jlonka.dubach@made-by-nähsüchtig.ch'
+  const existing = await prisma.adminUser.findUnique({ where: { email: adminEmail } })
+  if (!existing) {
+    const hash = await bcrypt.hash('Init1234!!', 12)
+    await prisma.adminUser.create({ data: { email: adminEmail, passwordHash: hash } })
+    console.log('Admin user erstellt:', adminEmail)
+  }
+
+  console.log('Seed erfolgreich: Kategorien, Produkte und Admin eingefügt.')
 }
 
 main()

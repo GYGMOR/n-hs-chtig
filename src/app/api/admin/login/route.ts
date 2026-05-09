@@ -1,20 +1,22 @@
 import bcrypt from "bcryptjs";
 import { signAdminToken } from "@/lib/admin-auth";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const { password } = await req.json();
+  const { email, password } = await req.json();
 
-  const hash = process.env.ADMIN_PASSWORD_HASH;
-  if (!hash || hash.includes("PLACEHOLDER")) {
-    return Response.json(
-      { error: "Admin-Passwort noch nicht konfiguriert. Führe npm run admin:hash aus." },
-      { status: 500 }
-    );
+  if (!email || !password) {
+    return Response.json({ error: "E-Mail und Passwort erforderlich" }, { status: 400 });
   }
 
-  const valid = await bcrypt.compare(password, hash);
+  const user = await prisma.adminUser.findUnique({ where: { email } });
+  if (!user) {
+    return Response.json({ error: "Ungültige Anmeldedaten" }, { status: 401 });
+  }
+
+  const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
-    return Response.json({ error: "Falsches Passwort" }, { status: 401 });
+    return Response.json({ error: "Ungültige Anmeldedaten" }, { status: 401 });
   }
 
   const token = await signAdminToken();

@@ -11,7 +11,7 @@ services:
       NODE_ENV: "production"
       PORT: "3000"
       DATABASE_URL: "postgres://sysadmin:rzP3MHh%3FZDckRe@db:5432/made-by-n%C3%A4hs%C3%BCchtig"
-      NEXT_PUBLIC_APP_URL: "https://made-by-nähsüchtig.ch"
+      NEXT_PUBLIC_APP_URL: "https://xn--made-by-nhschtig-3nb84b.ch"
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
@@ -21,7 +21,7 @@ services:
       MICROSOFT_TENANT_ID: ${MICROSOFT_TENANT_ID}
       MICROSOFT_ALLOWED_EMAILS: ${MICROSOFT_ALLOWED_EMAILS}
     labels:
-      caddy: "made-by-nähsüchtig.ch, www.made-by-nähsüchtig.ch"
+      caddy: "xn--made-by-nhschtig-3nb84b.ch, www.xn--made-by-nhschtig-3nb84b.ch"
       com.centurylinklabs.watchtower.enable: "true"
 
 networks:

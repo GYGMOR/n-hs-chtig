@@ -101,7 +101,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-12 border-t border-black/[0.05] flex flex-col md:flex-row justify-between items-center gap-10">
+        <div className="pt-12 border-t border-black/[0.05] flex flex-col md:flex-row justify-between items-center gap-8">
           <p className="text-foreground/30 text-[11px] uppercase tracking-[0.3em] font-bold">
             © {new Date().getFullYear()} Nähsüchtig. Alle Rechte vorbehalten.
           </p>
@@ -112,6 +112,23 @@ export default function Footer() {
               </Link>
             ))}
           </div>
+        </div>
+
+        {/* Created by */}
+        <div className="pt-10 flex flex-col items-center gap-4">
+          <p className="text-foreground/20 text-[10px] uppercase tracking-[0.4em] font-bold">Created & developed by</p>
+          <a
+            href="https://hed-it.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-40 hover:opacity-100 transition-opacity duration-500"
+          >
+            <img
+              src="/create/logo.png"
+              alt="hed-it.ch"
+              className="h-10 md:h-12 w-auto object-contain"
+            />
+          </a>
         </div>
       </div>
     </footer>

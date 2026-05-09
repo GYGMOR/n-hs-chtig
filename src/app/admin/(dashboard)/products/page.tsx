@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { Plus } from "lucide-react";
 import ProductsTable from "@/components/admin/ProductsTable";
 

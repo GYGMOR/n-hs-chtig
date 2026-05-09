@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import ProductDetailView from "@/components/ProductDetailView";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductDetailPage({
   params,
 }: {

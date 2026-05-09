@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import ProductGrid from "@/components/ProductGrid";
 
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage() {
   const [products, categories] = await Promise.all([
     prisma.product.findMany({

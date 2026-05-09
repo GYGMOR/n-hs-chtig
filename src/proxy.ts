@@ -9,6 +9,7 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname === "/admin/login") return NextResponse.next();
+  if (pathname.startsWith("/api/admin/auth/")) return NextResponse.next();
 
   const token = req.cookies.get("admin_token")?.value;
   if (!token) {
@@ -24,5 +25,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/auth/:path*"],
 };

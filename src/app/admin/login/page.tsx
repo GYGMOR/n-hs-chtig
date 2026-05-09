@@ -1,72 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Lock, Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function AdminLoginPage() {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-
-    if (res.ok) {
-      router.push("/admin");
-    } else {
-      const data = await res.json();
-      setError(data.error ?? "Fehler");
-    }
-    setLoading(false);
-  }
+  const errorMessages: Record<string, string> = {
+    access_denied: "Zugriff verweigert.",
+    token_failed: "Authentifizierung fehlgeschlagen.",
+    user_failed: "Benutzerdaten konnten nicht geladen werden.",
+    not_allowed: "Dieses Konto hat keinen Zugriff.",
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-surface-light">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm"
-      >
-        <div className="w-16 h-16 rounded-2xl bg-foreground flex items-center justify-center mx-auto mb-8">
-          <Lock className="w-7 h-7 text-background" />
+    <div className="min-h-screen flex items-center justify-center px-6 bg-gray-50">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center space-y-6">
+        <div className="space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-gray-900 flex items-center justify-center mx-auto">
+            <span className="text-white font-bold text-2xl font-serif">N</span>
+          </div>
+          <h1 className="text-xl font-bold text-gray-900">Admin Portal</h1>
+          <p className="text-sm text-gray-400">Made by Nähsüchtig</p>
         </div>
-        <h1 className="text-3xl font-display font-bold text-center mb-2 text-foreground">
-          Admin Portal
-        </h1>
-        <p className="text-foreground/40 text-center mb-8 text-sm">
-          Made by Nähsüchtig
-        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="password"
-            placeholder="Passwort"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:border-accent-rose transition-colors text-foreground"
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-12 bg-foreground text-background font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-accent-rose hover:text-white transition-all duration-300 disabled:opacity-60"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Anmelden"}
-          </button>
-        </form>
-      </motion.div>
+        {error && (
+          <p className="text-sm text-red-500 bg-red-50 px-4 py-2 rounded-xl">
+            {errorMessages[error] ?? "Ein Fehler ist aufgetreten."}
+          </p>
+        )}
+
+        <a
+          href="/api/admin/auth/microsoft"
+          className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-700 transition-colors text-sm"
+        >
+          <MicrosoftIcon />
+          Mit Microsoft anmelden
+        </a>
+      </div>
     </div>
+  );
+}
+
+function MicrosoftIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+    </svg>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }

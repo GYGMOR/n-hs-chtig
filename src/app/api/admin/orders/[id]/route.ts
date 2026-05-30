@@ -1,13 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { verifyAdminToken } from "@/lib/admin-auth";
 import { cookies } from "next/headers";
+import { sendShippingNotification } from "@/lib/email";
 
 async function auth() {
   const cookieStore = await cookies();
   const token = cookieStore.get("admin_token")?.value;
-  if (!token || !(await verifyAdminToken(token))) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  if (!token || !(await verifyAdminToken(token))) return new Response("Unauthorized", { status: 401 });
   return null;
 }
 
@@ -18,9 +17,16 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/admin/orders/[
   const { id } = await ctx.params;
   const { status } = await req.json();
 
-  const order = await prisma.order.update({
-    where: { id },
-    data: { status },
-  });
+  const prev = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.update({ where: { id }, data: { status } });
+
+  if (prev?.status !== "SHIPPED" && status === "SHIPPED") {
+    try {
+      await sendShippingNotification({ id: order.id, customerName: order.customerName, customerEmail: order.customerEmail });
+    } catch (err) {
+      console.error("Versand-E-Mail Fehler:", err);
+    }
+  }
+
   return Response.json(order);
 }

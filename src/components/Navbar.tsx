@@ -128,21 +128,17 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col gap-10">
               {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.name}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-6xl font-serif font-bold text-foreground hover:text-accent-rose transition-colors"
-                  >
+                <motion.div key={link.name} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}>
+                  <Link href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="text-6xl font-serif font-bold text-foreground hover:text-accent-rose transition-colors">
                     {link.name}
                   </Link>
                 </motion.div>
               ))}
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: navLinks.length * 0.1 }}>
+                <Link href="/portal" onClick={() => setIsMobileMenuOpen(false)} className="text-6xl font-serif font-bold text-foreground hover:text-accent-rose transition-colors">
+                  Konto
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}

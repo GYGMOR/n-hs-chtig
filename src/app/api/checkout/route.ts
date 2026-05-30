@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -8,6 +9,21 @@ export async function POST(req: NextRequest) {
 
     if (!items?.length) {
       return Response.json({ error: "Warenkorb ist leer" }, { status: 400 });
+    }
+
+    // Lagerbestand prüfen
+    const productIds = items.map((i: { id: number }) => i.id);
+    const dbProducts = await prisma.product.findMany({ where: { id: { in: productIds } } });
+    for (const item of items as { id: number; name: string; quantity: number }[]) {
+      const dbProd = dbProducts.find((p) => p.id === item.id);
+      if (!dbProd || !dbProd.active) {
+        return Response.json({ error: `"${item.name}" ist nicht mehr verfügbar.` }, { status: 400 });
+      }
+      if (dbProd.stock < item.quantity) {
+        return Response.json({
+          error: `"${item.name}" ist nur noch ${dbProd.stock}× verfügbar.`,
+        }, { status: 400 });
+      }
     }
 
     const lineItems = items.map((item: { name: string; price: number; quantity: number; image: string }) => ({

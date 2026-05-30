@@ -179,6 +179,61 @@ export async function sendContactEmail(data: {
   });
 }
 
+export async function sendShippingNotification(order: {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+}) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  const transport = createTransport();
+  await transport.sendMail({
+    from: FROM,
+    to: order.customerEmail,
+    subject: `Deine Bestellung ist unterwegs! #${order.id.slice(0, 8).toUpperCase()}`,
+    html: `
+      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:40px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background:#1a1a1a;padding:32px 48px;text-align:center;">
+          <h1 style="color:#fff;margin:0;font-size:20px;font-weight:300;letter-spacing:2px;">NÄHSÜCHTIG</h1>
+        </div>
+        <div style="padding:48px;">
+          <h2 style="margin:0 0 16px;font-size:28px;color:#1a1a1a;">Dein Paket ist unterwegs! 📦</h2>
+          <p style="color:#666;font-size:16px;line-height:1.7;">Hallo ${order.customerName},<br/><br/>
+            deine Bestellung <strong>#${order.id.slice(0, 8).toUpperCase()}</strong> wurde soeben verschickt.
+            Du kannst in wenigen Werktagen mit deinem Paket rechnen.
+          </p>
+          <p style="color:#666;font-size:14px;margin-top:32px;">
+            Bei Fragen erreichst du uns unter <a href="mailto:${process.env.SMTP_USER}" style="color:#c9696a;">${process.env.SMTP_USER}</a>.
+          </p>
+        </div>
+        <div style="background:#faf8f5;padding:20px 48px;text-align:center;border-top:1px solid #f0e8e0;">
+          <p style="margin:0;color:#999;font-size:12px;">© ${new Date().getFullYear()} Nähsüchtig · Kirchweg 2, 5614 Sarmenstorf</p>
+        </div>
+      </div>`,
+  });
+}
+
+export async function sendPasswordResetEmail(email: string, resetUrl: string) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  const transport = createTransport();
+  await transport.sendMail({
+    from: FROM,
+    to: email,
+    subject: "Passwort zurücksetzen – Nähsüchtig",
+    html: `
+      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:40px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <div style="background:#1a1a1a;padding:32px 48px;text-align:center;">
+          <h1 style="color:#fff;margin:0;font-size:20px;font-weight:300;letter-spacing:2px;">NÄHSÜCHTIG</h1>
+        </div>
+        <div style="padding:48px;">
+          <h2 style="margin:0 0 16px;font-size:24px;color:#1a1a1a;">Passwort zurücksetzen</h2>
+          <p style="color:#666;font-size:16px;line-height:1.7;">Klicke auf den Button, um ein neues Passwort zu setzen. Der Link ist 1 Stunde gültig.</p>
+          <a href="${resetUrl}" style="display:inline-block;margin:24px 0;padding:16px 32px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:12px;font-weight:700;">Neues Passwort setzen</a>
+          <p style="color:#999;font-size:12px;">Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>
+        </div>
+      </div>`,
+  });
+}
+
 export async function sendNewsletterConfirmation(email: string) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.warn("SMTP nicht konfiguriert");

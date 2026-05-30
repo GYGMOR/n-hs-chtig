@@ -14,11 +14,13 @@ model AdminUser {
 }
 
 model Customer {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  name         String
-  createdAt    DateTime @default(now())
+  id                   Int       @id @default(autoincrement())
+  email                String    @unique
+  passwordHash         String
+  name                 String
+  passwordResetToken   String?   @unique
+  passwordResetExpiry  DateTime?
+  createdAt            DateTime  @default(now())
 }
 
 model NewsletterSubscriber {

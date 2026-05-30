@@ -60,6 +60,14 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     },
   });
 
+  // Lagerbestand reduzieren
+  for (const item of cartItems) {
+    await prisma.product.update({
+      where: { id: item.id },
+      data: { stock: { decrement: item.quantity } },
+    });
+  }
+
   try {
     const addr = order.shippingAddress as {
       address: string; city: string; postalCode: string; country: string;

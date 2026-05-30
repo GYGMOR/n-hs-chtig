@@ -44,7 +44,7 @@ interface Order {
   total: number;
   subtotal: number;
   shipping: number;
-  shippingAddress: ShippingAddress;
+  shippingAddress: unknown;
   createdAt: Date;
   items: OrderItem[];
 }
@@ -138,11 +138,16 @@ export default function OrdersTable({ orders: initial }: { orders: Order[] }) {
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Lieferadresse</p>
                         {order.shippingAddress ? (
                           <address className="not-italic text-xs text-gray-600 leading-relaxed">
-                            <strong className="text-gray-800">{order.customerName}</strong><br />
-                            {order.shippingAddress.address}<br />
-                            {order.shippingAddress.postalCode} {order.shippingAddress.city}<br />
-                            {order.shippingAddress.country}
-                            {order.shippingAddress.phone && <><br />{order.shippingAddress.phone}</>}
+                            {(() => {
+                              const a = order.shippingAddress as ShippingAddress;
+                              return (<>
+                                <strong className="text-gray-800">{order.customerName}</strong><br />
+                                {a.address}<br />
+                                {a.postalCode} {a.city}<br />
+                                {a.country}
+                                {a.phone && <><br />{a.phone}</>}
+                              </>);
+                            })()}
                           </address>
                         ) : (
                           <p className="text-xs text-gray-400">Keine Adresse</p>

@@ -4,16 +4,18 @@ function createTransport() {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST ?? "smtp.office365.com",
     port: Number(process.env.SMTP_PORT ?? 587),
-    secure: false,
+    secure: false, // STARTTLS
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    tls: { ciphers: "SSLv3" },
+    tls: { rejectUnauthorized: process.env.NODE_ENV === "production" },
   });
 }
 
-const FROM = `"Nähsüchtig" <${process.env.SMTP_USER}>`;
+function getFrom() {
+  return `"Nähsüchtig" <${process.env.SMTP_USER ?? "noreply@naehsuechtig.ch"}>`;
+}
 
 export interface OrderEmailData {
   orderId: string;
@@ -135,7 +137,7 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
 </html>`;
 
   await transport.sendMail({
-    from: FROM,
+    from: getFrom(),
     to: order.customerEmail,
     subject: `Bestellbestätigung #${order.orderId.slice(0, 8).toUpperCase()} – Nähsüchtig`,
     html,
@@ -163,7 +165,7 @@ export async function sendContactEmail(data: {
   const contactTarget = process.env.CONTACT_EMAIL ?? process.env.SMTP_USER!;
 
   await transport.sendMail({
-    from: FROM,
+    from: getFrom(),
     to: contactTarget,
     replyTo: data.email,
     subject: `Neue Kontaktanfrage von ${data.name}`,
@@ -187,7 +189,7 @@ export async function sendShippingNotification(order: {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
   const transport = createTransport();
   await transport.sendMail({
-    from: FROM,
+    from: getFrom(),
     to: order.customerEmail,
     subject: `Deine Bestellung ist unterwegs! #${order.id.slice(0, 8).toUpperCase()}`,
     html: `
@@ -216,7 +218,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
   const transport = createTransport();
   await transport.sendMail({
-    from: FROM,
+    from: getFrom(),
     to: email,
     subject: "Passwort zurücksetzen – Nähsüchtig",
     html: `
@@ -243,7 +245,7 @@ export async function sendNewsletterConfirmation(email: string) {
   const transport = createTransport();
 
   await transport.sendMail({
-    from: FROM,
+    from: getFrom(),
     to: email,
     subject: "Willkommen beim Nähsüchtig Newsletter",
     html: `

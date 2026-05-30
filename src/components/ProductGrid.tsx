@@ -18,6 +18,7 @@ interface Product {
   slug: string;
   price: number;
   images: string[];
+  stock: number;
   category: Category;
 }
 
@@ -108,11 +109,20 @@ export default function ProductGrid({ products, categories }: Props) {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute top-4 right-4 translate-y-0 md:translate-y-4 opacity-100 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 transition-all duration-500">
-                    <div className="px-3 py-1 glass rounded-lg text-[10px] uppercase tracking-widest font-bold text-foreground">
-                      Limitierte Auflage
+                  {product.stock > 0 && product.stock <= 5 && (
+                    <div className="absolute top-4 right-4 translate-y-0 md:translate-y-4 opacity-100 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 transition-all duration-500">
+                      <div className="px-3 py-1 bg-amber-500 text-white rounded-lg text-[10px] uppercase tracking-widest font-bold">
+                        Nur noch {product.stock}
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  {product.stock <= 0 && (
+                    <div className="absolute top-4 right-4">
+                      <div className="px-3 py-1 bg-red-500 text-white rounded-lg text-[10px] uppercase tracking-widest font-bold">
+                        Ausverkauft
+                      </div>
+                    </div>
+                  )}
                   <div className="absolute bottom-6 left-6 right-6 translate-y-0 md:translate-y-4 opacity-100 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 transition-all duration-500">
                     <button
                       onClick={(e) => {
@@ -142,7 +152,7 @@ export default function ProductGrid({ products, categories }: Props) {
                   </h3>
                 </div>
                 <p className="text-xl font-display font-bold text-foreground/90">
-                  CHF {product.price}
+                  CHF {product.price.toFixed(2)}
                 </p>
               </div>
             </motion.div>

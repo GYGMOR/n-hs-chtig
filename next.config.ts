@@ -6,9 +6,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
-    localPatterns: [
-      { pathname: "/uploads/**" },
-    ],
   },
   webpack: (config) => {
     config.resolve.symlinks = false;

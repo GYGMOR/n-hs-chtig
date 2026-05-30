@@ -60,10 +60,10 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     },
   });
 
-  // Lagerbestand reduzieren
+  // Lagerbestand reduzieren (stock nie unter 0)
   for (const item of cartItems) {
-    await prisma.product.update({
-      where: { id: item.id },
+    await prisma.product.updateMany({
+      where: { id: item.id, stock: { gte: item.quantity } },
       data: { stock: { decrement: item.quantity } },
     });
   }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, Search } from "lucide-react";
+import { ShoppingCart, Menu, X, Search, User } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 
 export default function Navbar() {
@@ -76,6 +76,9 @@ export default function Navbar() {
             <button className="hidden md:flex p-2 text-foreground/30 hover:text-accent-rose transition-colors">
               <Search className="w-5 h-5" />
             </button>
+            <Link href="/portal" className="hidden md:flex w-12 h-12 rounded-2xl glass border-black/[0.08] items-center justify-center text-foreground hover:bg-foreground hover:text-background transition-all duration-700 shadow-sm">
+              <User className="w-5 h-5" />
+            </Link>
             <div className="w-[1px] h-4 bg-black/[0.05] hidden md:block" />
             <Link href="/cart" className="relative group">
               <div className="w-12 h-12 rounded-2xl glass border-black/[0.08] flex items-center justify-center text-foreground group-hover:bg-foreground group-hover:text-background transition-all duration-700 shadow-sm">

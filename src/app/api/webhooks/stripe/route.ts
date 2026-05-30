@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendOrderConfirmation } from "@/lib/email";
+import { generateOrderPdf } from "@/lib/order-pdf";
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -32,7 +34,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
 
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  await prisma.order.create({
+  const order = await prisma.order.create({
     data: {
       stripeSessionId: session.id,
       status: "PAID",
@@ -57,4 +59,32 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
       },
     },
   });
+
+  try {
+    const addr = order.shippingAddress as {
+      address: string; city: string; postalCode: string; country: string;
+    };
+
+    const emailData = {
+      orderId: order.id,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      items: cartItems.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      subtotal: order.subtotal,
+      shipping: order.shipping,
+      total: order.total,
+      shippingAddress: {
+        address: addr.address ?? "",
+        city: addr.city ?? "",
+        postalCode: addr.postalCode ?? "",
+        country: addr.country ?? "",
+      },
+      createdAt: order.createdAt,
+    };
+
+    const pdfBuffer = await generateOrderPdf(emailData);
+    await sendOrderConfirmation(emailData, pdfBuffer);
+  } catch (err) {
+    console.error("E-Mail/PDF Fehler:", err);
+  }
 }

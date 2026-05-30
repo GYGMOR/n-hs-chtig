@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, X, Upload, Image as ImageIcon } from "lucide-react";
+import RichTextEditor from "./RichTextEditor";
 
 interface Category { id: number; name: string }
 
@@ -24,14 +25,19 @@ interface Props {
 }
 
 function toSlug(str: string) {
-  return str.toLowerCase().replace(/[äöü]/g, (c) => ({ ä: "ae", ö: "oe", ü: "ue" }[c] ?? c)).replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return str
+    .toLowerCase()
+    .replace(/[äöü]/g, (c) => ({ ä: "ae", ö: "oe", ü: "ue" }[c] ?? c))
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 export default function ProductForm({ categories, productId, initial }: Props) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
 
   const [form, setForm] = useState<ProductFormData>({
     name: initial?.name ?? "",
@@ -53,10 +59,26 @@ export default function ProductForm({ categories, productId, initial }: Props) {
     }));
   }
 
-  function addImage() {
-    if (!newImageUrl.trim()) return;
-    setForm((prev) => ({ ...prev, images: [...prev.images, newImageUrl.trim()] }));
-    setNewImageUrl("");
+  async function handleFileUpload(files: FileList | null) {
+    if (!files?.length) return;
+    setUploading(true);
+    setError("");
+
+    for (const file of Array.from(files)) {
+      const fd = new FormData();
+      fd.append("file", file);
+
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      if (res.ok) {
+        const { url } = await res.json();
+        setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Upload fehlgeschlagen");
+      }
+    }
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function removeImage(idx: number) {
@@ -129,45 +151,85 @@ export default function ProductForm({ categories, productId, initial }: Props) {
             <span className="text-sm font-medium text-gray-700">Im Shop sichtbar</span>
           </label>
         </div>
+
+        {/* Rich Text Description */}
         <div className="col-span-2">
           <label className={labelClass}>Beschreibung</label>
-          <textarea
-            name="description"
+          <RichTextEditor
             value={form.description}
-            onChange={handleChange}
-            rows={4}
-            className={fieldClass + " resize-none"}
+            onChange={(html) => setForm((p) => ({ ...p, description: html }))}
           />
         </div>
       </div>
 
-      {/* Images */}
+      {/* Image Upload */}
       <div>
-        <label className={labelClass}>Bilder (URLs)</label>
-        <div className="space-y-2 mb-3">
-          {form.images.map((url, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <img src={url} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
-              <span className="flex-1 text-xs text-gray-500 truncate">{url}</span>
-              <button type="button" onClick={() => removeImage(i)} className="p-1 text-gray-400 hover:text-red-500 transition-colors">
-                <X className="w-4 h-4" />
-              </button>
+        <label className={labelClass}>Bilder</label>
+
+        {/* Upload Drop Zone */}
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            handleFileUpload(e.dataTransfer.files);
+          }}
+          className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-all"
+        >
+          {uploading ? (
+            <div className="flex flex-col items-center gap-2 text-gray-400">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <span className="text-sm">Wird hochgeladen …</span>
             </div>
-          ))}
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-gray-400">
+              <Upload className="w-8 h-8" />
+              <p className="text-sm font-medium text-gray-600">Klicken oder Dateien hierher ziehen</p>
+              <p className="text-xs text-gray-400">JPG, PNG, WEBP · max. 10 MB</p>
+            </div>
+          )}
         </div>
-        <div className="flex gap-2">
-          <input
-            type="url"
-            placeholder="https://..."
-            value={newImageUrl}
-            onChange={(e) => setNewImageUrl(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addImage(); } }}
-            className={fieldClass + " flex-1"}
-          />
-          <button type="button" onClick={addImage} className="px-3 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
-            <Plus className="w-4 h-4 text-gray-600" />
-          </button>
-        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
+          className="hidden"
+          onChange={(e) => handleFileUpload(e.target.files)}
+        />
+
+        {/* Preview Grid */}
+        {form.images.length > 0 && (
+          <div className="mt-4 grid grid-cols-4 gap-3">
+            {form.images.map((url, i) => (
+              <div key={i} className="relative group">
+                <img
+                  src={url}
+                  alt=""
+                  className="w-full aspect-square rounded-xl object-cover bg-gray-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+                {i === 0 && (
+                  <span className="absolute bottom-1 left-1 text-[10px] bg-black/60 text-white rounded px-1.5 py-0.5 font-bold">
+                    Haupt
+                  </span>
+                )}
+              </div>
+            ))}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+            >
+              <ImageIcon className="w-6 h-6 text-gray-300" />
+            </div>
+          </div>
+        )}
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -175,7 +237,7 @@ export default function ProductForm({ categories, productId, initial }: Props) {
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || uploading}
           className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-rose-600 transition-colors disabled:opacity-60 flex items-center gap-2"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}

@@ -1,7 +1,24 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Facebook, Instagram, X, Mail, MapPin, ArrowRight, Heart } from "lucide-react";
+import { Facebook, Instagram, X, ArrowRight, Heart, Check } from "lucide-react";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  async function handleNewsletter(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    const res = await fetch("/api/newsletter/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    setStatus(res.ok ? "success" : "error");
+  }
+
   return (
     <footer className="bg-footer-bg border-t border-accent-rose/10 pt-24 pb-16 px-6 relative overflow-hidden">
       {/* Artisan Background Texture */}
@@ -76,16 +93,33 @@ export default function Footer() {
             <div className="space-y-6">
               <h4 className="font-serif font-bold text-lg text-foreground uppercase tracking-widest">Inspiration</h4>
               <p className="text-foreground/40 text-sm font-light">Erhalten Sie Einblicke in neue Kollektionen und den Entstehungsprozess.</p>
-              <div className="relative group">
-                <input 
-                  type="email" 
-                  placeholder="Ihre E-Mail" 
-                  className="w-full bg-white border border-black/[0.05] rounded-2xl py-5 px-6 focus:outline-none focus:border-accent-rose transition-all duration-500 text-sm shadow-sm"
-                />
-                <button className="absolute right-3 top-3 bottom-3 w-12 bg-foreground text-background rounded-xl flex items-center justify-center hover:bg-accent-rose transition-all duration-500 shadow-lg group-hover:scale-105">
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
+              {status === "success" ? (
+                <div className="flex items-center gap-3 py-5 px-6 bg-green-50 border border-green-200 rounded-2xl text-green-700 text-sm font-medium">
+                  <Check className="w-5 h-5 text-green-500 shrink-0" />
+                  Vielen Dank! Sie erhalten in Kürze eine Bestätigung.
+                </div>
+              ) : (
+                <form onSubmit={handleNewsletter} className="relative group">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Ihre E-Mail"
+                    className="w-full bg-white border border-black/[0.05] rounded-2xl py-5 px-6 focus:outline-none focus:border-accent-rose transition-all duration-500 text-sm shadow-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="absolute right-3 top-3 bottom-3 w-12 bg-foreground text-background rounded-xl flex items-center justify-center hover:bg-accent-rose transition-all duration-500 shadow-lg group-hover:scale-105 disabled:opacity-60"
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                  {status === "error" && (
+                    <p className="text-red-500 text-xs mt-2 px-2">Fehler – bitte erneut versuchen.</p>
+                  )}
+                </form>
+              )}
             </div>
             
             <div className="p-6 rounded-[32px] glass-premium flex items-center gap-5 border-white/50">

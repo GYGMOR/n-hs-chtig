@@ -20,9 +20,21 @@ services:
       MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
       MICROSOFT_TENANT_ID: ${MICROSOFT_TENANT_ID}
       MICROSOFT_ALLOWED_EMAILS: ${MICROSOFT_ALLOWED_EMAILS}
+      CUSTOMER_JWT_SECRET: ${CUSTOMER_JWT_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      CONTACT_EMAIL: ${CONTACT_EMAIL}
+      NEXT_PUBLIC_CONTACT_EMAIL: ${NEXT_PUBLIC_CONTACT_EMAIL}
+    volumes:
+      - uploads:/app/public/uploads
     labels:
       caddy: "xn--made-by-nhschtig-3nb84b.ch, www.xn--made-by-nhschtig-3nb84b.ch"
       com.centurylinklabs.watchtower.enable: "true"
+
+volumes:
+  uploads:
 
 networks:
   web:

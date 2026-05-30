@@ -39,7 +39,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
       stripeSessionId: session.id,
       status: "PAID",
       customerName: meta.customerName,
-      customerEmail: meta.customerEmail,
+      customerEmail: (meta.customerEmail ?? "").toLowerCase().trim(),
       shippingAddress: {
         address: meta.address,
         city: meta.city,

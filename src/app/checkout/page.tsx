@@ -26,6 +26,7 @@ export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loggedInEmail, setLoggedInEmail] = useState<string | null>(null);
 
   const [form, setForm] = useState<FormData>({
     firstName: "",
@@ -40,6 +41,23 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setMounted(true);
+    // Eingeloggten Kunden laden und Felder vorausfüllen
+    fetch("/api/customer/me")
+      .then((r) => r.json())
+      .then((customer: { email: string; name: string } | null) => {
+        if (!customer) return;
+        setLoggedInEmail(customer.email);
+        const nameParts = customer.name.trim().split(" ");
+        const firstName = nameParts[0] ?? "";
+        const lastName = nameParts.slice(1).join(" ");
+        setForm((prev) => ({
+          ...prev,
+          email: customer.email,
+          firstName: prev.firstName || firstName,
+          lastName: prev.lastName || lastName,
+        }));
+      })
+      .catch(() => {});
   }, []);
 
   if (!mounted) return null;
@@ -135,14 +153,22 @@ export default function CheckoutPage() {
                     <label className="block text-sm font-medium text-foreground/60 mb-2">
                       E-Mail *
                     </label>
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-surface-light border border-black/[0.05] rounded-xl focus:outline-none focus:border-accent-rose transition-colors text-foreground"
-                    />
+                    <div className="relative">
+                      <input
+                        required
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        readOnly={!!loggedInEmail}
+                        className={`w-full px-4 py-3 bg-surface-light border border-black/[0.05] rounded-xl focus:outline-none focus:border-accent-rose transition-colors text-foreground ${loggedInEmail ? "opacity-70 cursor-not-allowed" : ""}`}
+                      />
+                      {loggedInEmail && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-accent-rose font-bold uppercase tracking-widest">
+                          Konto
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground/60 mb-2">

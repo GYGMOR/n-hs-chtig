@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "E-Mail und Passwort erforderlich" }, { status: 400 });
   }
 
-  const customer = await prisma.customer.findUnique({ where: { email } });
+  const customer = await prisma.customer.findUnique({ where: { email: email.toLowerCase().trim() } });
   if (!customer) {
     return Response.json({ error: "Ungültige Anmeldedaten" }, { status: 401 });
   }

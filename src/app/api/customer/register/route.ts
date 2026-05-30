@@ -13,14 +13,15 @@ export async function POST(req: Request) {
     return Response.json({ error: "Passwort muss mindestens 8 Zeichen haben" }, { status: 400 });
   }
 
-  const existing = await prisma.customer.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const existing = await prisma.customer.findUnique({ where: { email: normalizedEmail } });
   if (existing) {
     return Response.json({ error: "Diese E-Mail ist bereits registriert" }, { status: 409 });
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
   const customer = await prisma.customer.create({
-    data: { name, email, passwordHash },
+    data: { name: name.trim(), email: normalizedEmail, passwordHash },
   });
 
   const token = await signCustomerToken({ id: customer.id, email: customer.email, name: customer.name });

@@ -22,8 +22,10 @@ export default function ImpressumPage() {
             <h2 className="text-xl font-bold mb-4 text-foreground">Kontakt</h2>
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-foreground/60">
-                <Mail className="w-5 h-5 text-accent-rose" />
-                <span>hello@naehsuechtig.ch</span>
+                <Mail className="w-5 h-5 text-accent-rose shrink-0" />
+                <a href="mailto:jlonkadubach@made-by-nähsüchtig.ch" className="hover:text-accent-rose transition-colors">
+                  jlonkadubach@made-by-nähsüchtig.ch
+                </a>
               </div>
               <div className="flex items-center gap-3 text-foreground/60">
                 <Phone className="w-5 h-5 text-accent-rose" />

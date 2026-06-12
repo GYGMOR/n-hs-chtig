@@ -14,7 +14,7 @@ function createTransport() {
 }
 
 function getFrom() {
-  return `"Nähsüchtig" <${process.env.SMTP_USER ?? "noreply@naehsuechtig.ch"}>`;
+  return `"Nähsüchtig" <${process.env.SMTP_USER ?? "jlonkadubach@xn--made-by-nhschtig-3nb84b.ch"}>`;
 }
 
 export interface OrderEmailData {

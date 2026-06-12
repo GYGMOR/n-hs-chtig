@@ -44,11 +44,17 @@ export default function Footer() {
               Wir erschaffen handgefertigte Unikate, die Tradition und zeitlose Eleganz vereinen. Jedes Stück ist ein Bekenntnis zu Qualität und Beständigkeit.
             </p>
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-accent-rose font-bold">Atelier</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-accent-rose font-bold">Atelier & Kontakt</p>
               <p className="text-sm text-foreground/50 font-light">
                 Kirchweg 2 <br />
                 5614 Sarmenstorf <br />
-                Aargau, Schweiz
+                Aargau, Schweiz <br />
+                <a
+                  href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "jlonkadubach@made-by-nähsüchtig.ch"}`}
+                  className="hover:text-accent-rose transition-colors font-medium mt-1 inline-block"
+                >
+                  {process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "jlonkadubach@made-by-nähsüchtig.ch"}
+                </a>
               </p>
             </div>
             <div className="flex items-center gap-5">

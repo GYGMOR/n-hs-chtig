@@ -77,7 +77,7 @@ async function main() {
   }
 
   // Admin user
-  const adminEmail = 'jlonka.dubach@made-by-nähsüchtig.ch'
+  const adminEmail = 'jlonkadubach@xn--made-by-nhschtig-3nb84b.ch'
   const existing = await prisma.adminUser.findUnique({ where: { email: adminEmail } })
   if (!existing) {
     const hash = await bcrypt.hash('Init1234!!', 12)

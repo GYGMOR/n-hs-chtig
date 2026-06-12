@@ -58,9 +58,9 @@ export default function ContactPage() {
 
               <div className="space-y-10">
                 {[
-                  { icon: Mail, label: "E-Mail", val: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@naehsuechtig.ch" },
-                  { icon: Phone, label: "Telefon", val: "+41 44 123 45 67" },
-                  { icon: MapPin, label: "Atelier", val: "Kirchweg 2, 5614 Sarmenstorf" },
+                  { icon: Mail, label: "E-Mail", val: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "jlonkadubach@made-by-nähsüchtig.ch", href: `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "jlonkadubach@made-by-nähsüchtig.ch"}` },
+                  { icon: Phone, label: "Telefon", val: "+41 44 123 45 67", href: "tel:+41441234567" },
+                  { icon: MapPin, label: "Atelier", val: "Kirchweg 2, 5614 Sarmenstorf", href: null },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-8 group">
                     <div className="w-16 h-16 rounded-2xl bg-surface-light text-accent-rose flex items-center justify-center group-hover:bg-accent-rose group-hover:text-white transition-all duration-500 shadow-sm">
@@ -68,7 +68,13 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/30 font-bold mb-1">{item.label}</p>
-                      <p className="text-xl font-serif font-bold text-foreground">{item.val}</p>
+                      {item.href ? (
+                        <a href={item.href} className="text-xl font-serif font-bold text-foreground hover:text-accent-rose transition-colors">
+                          {item.val}
+                        </a>
+                      ) : (
+                        <p className="text-xl font-serif font-bold text-foreground">{item.val}</p>
+                      )}
                     </div>
                   </div>
                 ))}

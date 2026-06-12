@@ -19,6 +19,15 @@ export async function GET() {
     sharpAvailable: false,
     sharpError: null,
     uploadsFiles: [],
+    envValues: {
+      SMTP_HOST: process.env.SMTP_HOST || null,
+      SMTP_PORT: process.env.SMTP_PORT || null,
+      SMTP_USER: process.env.SMTP_USER || null,
+      SMTP_FROM: process.env.SMTP_FROM || null,
+      CONTACT_EMAIL: process.env.CONTACT_EMAIL || null,
+      NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL || null,
+      SMTP_PASS_SET: !!process.env.SMTP_PASS,
+    }
   };
 
   try {

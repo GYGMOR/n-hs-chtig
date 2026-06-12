@@ -27,10 +27,27 @@ export async function POST(req: Request) {
   if (denied) return denied;
 
   const body = await req.json();
-  const { name, slug, description, price, images, stock, categoryId, active } = body;
+  const { name, slug, description, price, images, stock, categoryId, active, featured } = body;
+
+  if (featured) {
+    const featuredCount = await prisma.product.count({ where: { featured: true } });
+    if (featuredCount >= 3) {
+      return Response.json({ error: "Maximal 3 Produkte auf der Startseite erlaubt." }, { status: 400 });
+    }
+  }
 
   const product = await prisma.product.create({
-    data: { name, slug, description, price: Number(price), images, stock: Number(stock), categoryId: Number(categoryId), active: Boolean(active) },
+    data: { 
+      name, 
+      slug, 
+      description, 
+      price: Number(price), 
+      images, 
+      stock: Number(stock), 
+      categoryId: Number(categoryId), 
+      active: Boolean(active),
+      featured: Boolean(featured)
+    },
     include: { category: true },
   });
   return Response.json(product, { status: 201 });

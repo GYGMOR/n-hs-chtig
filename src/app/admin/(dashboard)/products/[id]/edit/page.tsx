@@ -10,9 +10,10 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [product, categories] = await Promise.all([
+  const [product, categories, featuredCount] = await Promise.all([
     prisma.product.findUnique({ where: { id: Number(id) } }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.product.count({ where: { featured: true } }),
   ]);
 
   if (!product) notFound();
@@ -23,6 +24,7 @@ export default async function EditProductPage({
       <ProductForm
         categories={categories}
         productId={product.id}
+        featuredCount={featuredCount}
         initial={{
           name: product.name,
           slug: product.slug,
@@ -31,6 +33,7 @@ export default async function EditProductPage({
           stock: String(product.stock),
           categoryId: String(product.categoryId),
           active: product.active,
+          featured: product.featured,
           images: product.images,
         }}
       />

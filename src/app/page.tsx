@@ -47,7 +47,7 @@ export default async function Home() {
         where: { page: "home" },
       }),
       prisma.product.findMany({
-        where: { active: true },
+        where: { active: true, featured: true },
         take: 3,
         include: { category: true },
         orderBy: { createdAt: "desc" },

@@ -45,6 +45,7 @@ model Product {
   images      String[]
   stock       Int         @default(99)
   active      Boolean     @default(true)
+  featured    Boolean     @default(false)
   categoryId  Int
   category    Category    @relation(fields: [categoryId], references: [id])
   orderItems  OrderItem[]

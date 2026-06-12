@@ -15,12 +15,14 @@ interface ProductFormData {
   stock: string;
   categoryId: string;
   active: boolean;
+  featured: boolean;
   images: string[];
 }
 
 interface Props {
   categories: Category[];
   productId?: number;
+  featuredCount: number;
   initial?: Partial<ProductFormData>;
 }
 
@@ -32,7 +34,7 @@ function toSlug(str: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-export default function ProductForm({ categories, productId, initial }: Props) {
+export default function ProductForm({ categories, productId, initial, featuredCount }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -47,8 +49,11 @@ export default function ProductForm({ categories, productId, initial }: Props) {
     stock: initial?.stock ?? "99",
     categoryId: initial?.categoryId ?? String(categories[0]?.id ?? ""),
     active: initial?.active ?? true,
+    featured: initial?.featured ?? false,
     images: initial?.images ?? [],
   });
+
+  const isFeaturedDisabled = !form.featured && featuredCount >= 3;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value, type } = e.target;
@@ -149,6 +154,19 @@ export default function ProductForm({ categories, productId, initial }: Props) {
               className="w-4 h-4 rounded border-gray-300"
             />
             <span className="text-sm font-medium text-gray-700">Im Shop sichtbar</span>
+          </label>
+        </div>
+        <div className="flex items-end pb-1">
+          <label className={`flex items-center gap-3 ${isFeaturedDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`} title={isFeaturedDisabled ? "Maximal 3 Produkte auf der Startseite erlaubt" : ""}>
+            <input
+              type="checkbox"
+              name="featured"
+              checked={form.featured}
+              disabled={isFeaturedDisabled}
+              onChange={handleChange}
+              className="w-4 h-4 rounded border-gray-300"
+            />
+            <span className="text-sm font-medium text-gray-700">Auf Startseite anzeigen</span>
           </label>
         </div>
 

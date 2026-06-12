@@ -1,15 +1,19 @@
 import nodemailer from "nodemailer";
 
 function createTransport() {
+  const port = Number(process.env.SMTP_PORT ?? 587);
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST ?? "smtp.office365.com",
-    port: Number(process.env.SMTP_PORT ?? 587),
-    secure: false, // STARTTLS
+    port,
+    secure: port === 465,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
     tls: { rejectUnauthorized: process.env.NODE_ENV === "production" },
+    connectionTimeout: 10000, // 10 seconds timeout
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 }
 

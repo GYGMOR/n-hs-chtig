@@ -84,3 +84,15 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+
+model WebsiteImage {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  url       String
+  alt       String   @default("")
+  page      String
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

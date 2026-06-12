@@ -2,6 +2,8 @@ import Hero from "@/components/Hero";
 import { ArrowRight, Star, ShieldCheck, Zap, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import * as motion from "framer-motion/client";
+import { prisma } from "@/lib/prisma";
+import CMSImage from "@/components/CMSImage";
 
 const featuredProducts = [
   {
@@ -34,9 +36,45 @@ const trustBadges = [
   { icon: ShieldCheck, label: "Limitierte Auflagen", sub: "Einzigartige Kreationen" },
 ];
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  let cmsImages: any[] = [];
+  let dbProducts: any[] = [];
+  try {
+    [cmsImages, dbProducts] = await Promise.all([
+      prisma.websiteImage.findMany({
+        where: { page: "home" },
+      }),
+      prisma.product.findMany({
+        where: { active: true },
+        take: 3,
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
+  } catch (err) {
+    console.error("Failed to fetch database items for Home page:", err);
+  }
+
+  const cmsImageMap = cmsImages.reduce((acc, img) => {
+    acc[img.key] = img;
+    return acc;
+  }, {} as Record<string, typeof cmsImages[0]>);
+
+  const productsToRender = dbProducts.length > 0
+    ? dbProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price.toFixed(2),
+        category: p.category.name,
+        image: p.images[0] || "",
+      }))
+    : featuredProducts;
+
   return (
     <div className="flex flex-col">
+
       <Hero />
 
       {/* Trust Badges */}
@@ -81,7 +119,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 lg:gap-16">
-            {featuredProducts.map((product, i) => (
+            {productsToRender.map((product, i) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 40 }}
@@ -92,12 +130,13 @@ export default function Home() {
                 <Link href={`/shop/${product.id}`}>
                   <div className="aspect-[4/5] rounded-[32px] md:rounded-[48px] overflow-hidden glass-premium mb-6 md:mb-8 lg:mb-10 relative">
                     <div className="absolute inset-0 fabric-pattern opacity-0 group-hover:opacity-[0.06] transition-opacity duration-1000" />
-                    <img
+                    <CMSImage
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
+                      label="Produktbild"
                     />
-                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                     <div className="absolute top-6 right-6">
                       <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl glass-premium flex items-center justify-center text-foreground opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-6 group-hover:translate-y-0 shadow-2xl">
                         <ShoppingCart className="w-5 h-5 md:w-7 md:h-7" />
@@ -123,7 +162,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+ 
       {/* Brand Story Section */}
       <section className="section-padding px-4 sm:px-6 bg-background relative overflow-hidden">
         <div className="absolute inset-0 fabric-pattern opacity-[0.03] pointer-events-none" />
@@ -131,12 +170,13 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 lg:gap-20 xl:gap-32 items-center">
             <div className="lg:col-span-7 relative">
               <div className="aspect-[16/10] rounded-[40px] md:rounded-[64px] overflow-hidden glass-premium relative z-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
-                <img
-                  src="https://images.unsplash.com/photo-1452830978618-d6feae7d0ffa?q=80&w=1200&auto=format&fit=crop"
-                  alt="Artisan Craftsmanship"
+                <CMSImage
+                  src={cmsImageMap["home_brand_story"]?.url}
+                  alt={cmsImageMap["home_brand_story"]?.alt || "Artisan Craftsmanship"}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-105"
+                  label={cmsImageMap["home_brand_story"]?.label || "Philosophie Bild"}
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-accent-rose/10 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-accent-rose/10 via-transparent to-transparent pointer-events-none" />
               </div>
 
               <motion.div

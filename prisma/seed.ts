@@ -85,7 +85,55 @@ async function main() {
     console.log('Admin user erstellt:', adminEmail)
   }
 
-  console.log('Seed erfolgreich: Kategorien, Produkte und Admin eingefügt.')
+  // Seed CMS images
+  const defaultImages = [
+    {
+      key: "home_brand_story",
+      url: "https://images.unsplash.com/photo-1452830978618-d6feae7d0ffa?q=80&w=1200&auto=format&fit=crop",
+      alt: "Artisan Craftsmanship",
+      page: "home",
+      label: "Startseite - Philosophie (Jeder Stich hat eine Seele)"
+    },
+    {
+      key: "about_founder",
+      url: "/images/inhaberin.jpg",
+      alt: "Jlonka Dubach",
+      page: "about",
+      label: "Über Uns - Gründerin (Jlonka Dubach)"
+    },
+    {
+      key: "about_workshop_1",
+      url: "https://images.unsplash.com/photo-1516575150278-7718028e1924?q=80&w=800&auto=format&fit=crop",
+      alt: "Workshop 1",
+      page: "about",
+      label: "Über Uns - Werkstatt Bild 1"
+    },
+    {
+      key: "about_workshop_2",
+      url: "https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?q=80&w=800&auto=format&fit=crop",
+      alt: "Workshop 2",
+      page: "about",
+      label: "Über Uns - Werkstatt Bild 2"
+    },
+    {
+      key: "craft_atelier",
+      url: "https://images.unsplash.com/photo-1516575150278-7718028e1924?q=80&w=1200&auto=format&fit=crop",
+      alt: "Atelier",
+      page: "craft",
+      label: "Handwerk - Atelier"
+    }
+  ];
+
+  for (const img of defaultImages) {
+    await prisma.websiteImage.upsert({
+      where: { key: img.key },
+      update: {},
+      create: img
+    });
+  }
+  console.log("Seed erfolgreich: CMS-Bilder eingefügt.");
+
+  console.log('Seed erfolgreich: Kategorien, Produkte, Admin und CMS-Bilder eingefügt.')
 }
 
 main()

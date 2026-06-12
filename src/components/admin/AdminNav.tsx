@@ -2,13 +2,14 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingBag, LogOut, Scissors, Tag } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, LogOut, Scissors, Tag, Image } from "lucide-react";
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/products", icon: Package, label: "Produkte" },
   { href: "/admin/orders", icon: ShoppingBag, label: "Bestellungen" },
   { href: "/admin/categories", icon: Tag, label: "Kategorien" },
+  { href: "/admin/images", icon: Image, label: "Bilder (CMS)" },
 ];
 
 export default function AdminNav() {

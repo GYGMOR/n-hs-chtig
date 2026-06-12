@@ -4,7 +4,7 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat vips-dev
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --os=linux --libc=musl
 
 FROM base AS builder
 RUN apk add --no-cache vips-dev

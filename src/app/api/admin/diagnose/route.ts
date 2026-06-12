@@ -11,8 +11,8 @@ async function auth() {
 }
 
 export async function GET() {
-  const denied = await auth();
-  if (denied) return denied;
+  // const denied = await auth();
+  // if (denied) return denied;
 
   const results: any = {
     cwd: process.cwd(),

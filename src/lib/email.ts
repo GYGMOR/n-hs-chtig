@@ -11,7 +11,7 @@ function createTransport() {
       pass: process.env.SMTP_PASS,
     },
     tls: { rejectUnauthorized: process.env.NODE_ENV === "production" },
-    connectionTimeout: 10000, // 10 seconds timeout
+    connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
   });
@@ -24,6 +24,87 @@ function getSenderEmail() {
 
 function getFrom() {
   return `"Nähsüchtig" <${getSenderEmail()}>`;
+}
+
+interface EmailOptions {
+  from: string;
+  to: string;
+  replyTo?: string;
+  subject: string;
+  html: string;
+  attachments?: {
+    filename: string;
+    content: Buffer;
+    contentType?: string;
+  }[];
+}
+
+async function sendEmail(options: EmailOptions) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn("SMTP nicht konfiguriert – E-Mail wird nicht gesendet");
+    return;
+  }
+
+  const isResend = process.env.SMTP_HOST === "smtp.resend.com" || process.env.SMTP_USER === "resend";
+
+  if (isResend) {
+    try {
+      const apiKey = process.env.SMTP_PASS;
+      
+      const payload: any = {
+        from: options.from,
+        to: [options.to],
+        subject: options.subject,
+        html: options.html,
+      };
+
+      if (options.replyTo) {
+        payload.reply_to = options.replyTo;
+      }
+
+      if (options.attachments && options.attachments.length > 0) {
+        payload.attachments = options.attachments.map(att => ({
+          filename: att.filename,
+          content: att.content.toString("base64"),
+        }));
+      }
+
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Resend HTTP API returned status ${res.status}`);
+      }
+
+      const resData = await res.json();
+      console.log("E-Mail erfolgreich über Resend HTTP API gesendet:", resData.id);
+      return;
+    } catch (err) {
+      console.error("Fehler beim Senden über Resend HTTP API, versuche SMTP Fallback...", err);
+    }
+  }
+
+  // Fallback to standard Nodemailer SMTP
+  const transport = createTransport();
+  await transport.sendMail({
+    from: options.from,
+    to: options.to,
+    replyTo: options.replyTo,
+    subject: options.subject,
+    html: options.html,
+    attachments: options.attachments?.map(att => ({
+      filename: att.filename,
+      content: att.content,
+      contentType: att.contentType,
+    })),
+  });
 }
 
 export interface OrderEmailData {
@@ -44,13 +125,6 @@ export interface OrderEmailData {
 }
 
 export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Buffer) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("SMTP nicht konfiguriert – E-Mail wird nicht gesendet");
-    return;
-  }
-
-  const transport = createTransport();
-
   const itemRows = order.items
     .map(
       (i) =>
@@ -72,8 +146,6 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
 </head>
 <body style="margin:0;padding:0;background:#faf8f5;font-family:'Segoe UI',Arial,sans-serif;">
   <div style="max-width:600px;margin:40px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-
-    <!-- Header -->
     <div style="background:#1a1a1a;padding:40px 48px;text-align:center;">
       <div style="width:56px;height:56px;background:#fff;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
         <span style="font-size:28px;font-weight:900;color:#1a1a1a;line-height:1;">N</span>
@@ -81,19 +153,13 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
       <h1 style="color:#fff;margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">NÄHSÜCHTIG</h1>
       <p style="color:#ffffff80;margin:8px 0 0;font-size:11px;letter-spacing:4px;text-transform:uppercase;">Artisan Atelier</p>
     </div>
-
-    <!-- Body -->
     <div style="padding:48px;">
       <h2 style="margin:0 0 8px;font-size:28px;font-weight:700;color:#1a1a1a;">Vielen Dank für Ihre Bestellung!</h2>
       <p style="color:#666;margin:0 0 32px;font-size:16px;">Hallo ${order.customerName}, Ihre Bestellung ist eingegangen.</p>
-
-      <!-- Order Info -->
       <div style="background:#faf8f5;border-radius:12px;padding:20px 24px;margin-bottom:32px;">
         <p style="margin:0;font-size:13px;color:#999;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Bestellnummer</p>
         <p style="margin:6px 0 0;font-size:16px;font-weight:700;color:#1a1a1a;font-family:monospace;">${order.orderId}</p>
       </div>
-
-      <!-- Items Table -->
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
         <thead>
           <tr style="background:#faf8f5;">
@@ -106,8 +172,6 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
           ${itemRows}
         </tbody>
       </table>
-
-      <!-- Totals -->
       <div style="border-top:2px solid #f0e8e0;padding-top:16px;margin-bottom:32px;">
         <div style="display:flex;justify-content:space-between;padding:6px 12px;font-size:14px;color:#666;">
           <span>Zwischensumme</span><span>CHF ${order.subtotal.toFixed(2)}</span>
@@ -119,8 +183,6 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
           <span>Gesamt</span><span>CHF ${order.total.toFixed(2)}</span>
         </div>
       </div>
-
-      <!-- Shipping Address -->
       <div style="background:#faf8f5;border-radius:12px;padding:20px 24px;margin-bottom:40px;">
         <p style="margin:0 0 8px;font-size:11px;color:#999;letter-spacing:2px;text-transform:uppercase;font-weight:600;">Lieferadresse</p>
         <p style="margin:0;color:#1a1a1a;line-height:1.7;">
@@ -130,14 +192,11 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
           ${order.shippingAddress.country}
         </p>
       </div>
-
       <p style="color:#666;font-size:14px;line-height:1.7;">
         Im Anhang finden Sie Ihren Kaufbeleg als PDF. Bei Fragen erreichen Sie uns unter
         <a href="mailto:${getSenderEmail()}" style="color:#c9696a;text-decoration:none;">${getSenderEmail()}</a>.
       </p>
     </div>
-
-    <!-- Footer -->
     <div style="background:#faf8f5;padding:24px 48px;text-align:center;border-top:1px solid #f0e8e0;">
       <p style="margin:0;color:#999;font-size:12px;">© ${new Date().getFullYear()} Nähsüchtig · Kirchweg 2, 5614 Sarmenstorf</p>
     </div>
@@ -145,7 +204,7 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
 </body>
 </html>`;
 
-  await transport.sendMail({
+  await sendEmail({
     from: getFrom(),
     to: order.customerEmail,
     subject: `Bestellbestätigung #${order.orderId.slice(0, 8).toUpperCase()} – Nähsüchtig`,
@@ -165,15 +224,9 @@ export async function sendContactEmail(data: {
   email: string;
   message: string;
 }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("SMTP nicht konfiguriert – Kontakt-E-Mail wird nicht gesendet");
-    return;
-  }
-
-  const transport = createTransport();
   const contactTarget = process.env.CONTACT_EMAIL ?? process.env.SMTP_USER!;
 
-  await transport.sendMail({
+  await sendEmail({
     from: getFrom(),
     to: contactTarget,
     replyTo: data.email,
@@ -195,9 +248,7 @@ export async function sendShippingNotification(order: {
   customerName: string;
   customerEmail: string;
 }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
-  const transport = createTransport();
-  await transport.sendMail({
+  await sendEmail({
     from: getFrom(),
     to: order.customerEmail,
     subject: `Deine Bestellung ist unterwegs! #${order.id.slice(0, 8).toUpperCase()}`,
@@ -224,9 +275,7 @@ export async function sendShippingNotification(order: {
 }
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
-  const transport = createTransport();
-  await transport.sendMail({
+  await sendEmail({
     from: getFrom(),
     to: email,
     subject: "Passwort zurücksetzen – Nähsüchtig",
@@ -246,14 +295,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
 }
 
 export async function sendNewsletterConfirmation(email: string) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("SMTP nicht konfiguriert");
-    return;
-  }
-
-  const transport = createTransport();
-
-  await transport.sendMail({
+  await sendEmail({
     from: getFrom(),
     to: email,
     subject: "Willkommen beim Nähsüchtig Newsletter",

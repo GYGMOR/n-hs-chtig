@@ -13,8 +13,13 @@ function createTransport() {
   });
 }
 
+function getSenderEmail() {
+  const fromEmail = process.env.SMTP_FROM ?? process.env.CONTACT_EMAIL ?? "jlonkadubach@xn--made-by-nhschtig-3nb84b.ch";
+  return fromEmail === "resend" ? "jlonkadubach@xn--made-by-nhschtig-3nb84b.ch" : fromEmail;
+}
+
 function getFrom() {
-  return `"Nähsüchtig" <${process.env.SMTP_USER ?? "jlonkadubach@xn--made-by-nhschtig-3nb84b.ch"}>`;
+  return `"Nähsüchtig" <${getSenderEmail()}>`;
 }
 
 export interface OrderEmailData {
@@ -124,7 +129,7 @@ export async function sendOrderConfirmation(order: OrderEmailData, pdfBuffer: Bu
 
       <p style="color:#666;font-size:14px;line-height:1.7;">
         Im Anhang finden Sie Ihren Kaufbeleg als PDF. Bei Fragen erreichen Sie uns unter
-        <a href="mailto:${process.env.SMTP_USER}" style="color:#c9696a;text-decoration:none;">${process.env.SMTP_USER}</a>.
+        <a href="mailto:${getSenderEmail()}" style="color:#c9696a;text-decoration:none;">${getSenderEmail()}</a>.
       </p>
     </div>
 
@@ -204,7 +209,7 @@ export async function sendShippingNotification(order: {
             Du kannst in wenigen Werktagen mit deinem Paket rechnen.
           </p>
           <p style="color:#666;font-size:14px;margin-top:32px;">
-            Bei Fragen erreichst du uns unter <a href="mailto:${process.env.SMTP_USER}" style="color:#c9696a;">${process.env.SMTP_USER}</a>.
+            Bei Fragen erreichst du uns unter <a href="mailto:${getSenderEmail()}" style="color:#c9696a;">${getSenderEmail()}</a>.
           </p>
         </div>
         <div style="background:#faf8f5;padding:20px 48px;text-align:center;border-top:1px solid #f0e8e0;">
